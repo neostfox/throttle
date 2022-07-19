@@ -1,0 +1,26 @@
+{
+  "name": "@shangyang/throttle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "throttle",
+    "process",
+    "queue"
+  ],
+  "author": "neo.st.fox",
+  "license": "MIT",
+  "dependencies": {
+    "ava": "^4.3.1",
+    "delay": "^5.0.0",
+    "in-range": "^3.0.0",
+    "rollup": "^2.77.0",
+    "time-span": "^5.1.0",
+    "tsd": "^0.22.0",
+    "typescript": "^4.7.4",
+    "xo": "^0.50.0"
+  }
+}
