@@ -16,4 +16,4 @@ type ThrottleResult = {
 	fulfilled: number;
 	rejected: number;
 };
-export { ThrottleOptions, ThrottleResult };
+export type { ThrottleOptions, ThrottleResult };
