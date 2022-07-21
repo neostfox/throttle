@@ -48,7 +48,7 @@ declare class Throttle {
     /**
      * push task to throttled queue
      */
-    push<T>(fn: () => () => (T | void)): symbol;
+    push<T>(fn: () => Promise<T> | void): symbol;
     private next;
     /**
      *if called function is Promise.

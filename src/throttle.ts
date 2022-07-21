@@ -3,7 +3,7 @@ import { isLegalNumber, firstKeyOfMap } from "./utils";
 import { CancelError, ThrottleError } from "./error";
 
 class Throttle {
-	private taskQueue = new Map<Symbol, () => any>();
+	private taskQueue = new Map<Symbol, Promise<any> | void>();
 	private props: ThrottleOptions = {
 		limit: 10,
 		interval: 1000,
@@ -55,7 +55,7 @@ class Throttle {
 	/**
 	 * push task to throttled queue
 	 */
-	push<T>(fn: () => () => (T | void)) {
+	push<T>(fn: () => Promise<T> | void) {
 		const key = Symbol();
 		this.taskQueue.set(key, fn());
 		this.total++;
