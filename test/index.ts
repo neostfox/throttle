@@ -6,18 +6,24 @@ import delay from "delay";
 const helloWorld = (str: string) => {
 	console.log("helloWorld" + str);
 };
-test("main", async (t) => {
-	const throttler = new Throttle({ limit: 5, interval: 1000 });
-	for (let i = 0; i < 100; i++) {
-		throttler.push<void>(() => () => helloWorld(i + ""));
-	}
-	throttler.done = (res) => {
-		const { total, taskTime } = res;
-		t.true(
-			inRange(timeSpan()(), {
-				start: taskTime - 200,
-				end: taskTime + 200,
-			})
-		);
-	};
-});
+const throttler = new Throttle<number, number>({ limit: 5, interval: 1000 });
+const fn = (index: number) => {
+	return new Promise<number>((resolve, reject) => {
+		console.log(index);
+		setTimeout(() => {
+			resolve(index)
+		}, 10);
+	})
+}
+for (let i = 0; i < 100; i++) {
+	throttler.push(fn, i);
+}
+
+throttler.run();
+
+// const throttlerAsync = new Throttle<string, void>({ limit: 5, interval: 1000 });
+
+// for (let i = 0; i < 100; i++) {
+// 	throttlerAsync.push(helloWorld, i + "");
+// }
+// throttlerAsync.run();

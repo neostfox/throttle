@@ -2,8 +2,8 @@ import type { ThrottleOptions, ThrottleResult } from "./types";
 import { isLegalNumber, firstKeyOfMap } from "./utils";
 import { CancelError, ThrottleError } from "./error";
 
-class Throttle {
-	private taskQueue = new Map<Symbol, Promise<any> | void>();
+class Throttle<T1, T2> {
+	private taskQueue = new Map<Symbol, () => Promise<T2> | T2>();
 	private props: ThrottleOptions = {
 		limit: 10,
 		interval: 1000,
@@ -55,9 +55,11 @@ class Throttle {
 	/**
 	 * push task to throttled queue
 	 */
-	push<T>(fn: () => Promise<T> | void) {
+	push(fn: (args: T1) => Promise<T2> | T2, args: T1) {
 		const key = Symbol();
-		this.taskQueue.set(key, fn());
+		this.taskQueue.set(key, () => {
+			return fn(args)
+		});
 		this.total++;
 		return key;
 	}
@@ -78,8 +80,8 @@ class Throttle {
 	 *if called function is Promise.
 	 * then when status fulfilled run next task
 	 */
-	private runPromise(fn: Promise<any>) {
-		fn.then((res) => {
+	private runPromise(fn: () => Promise<T2>) {
+		fn().then((res) => {
 			this.fulfilled++;
 			return res;
 		})
@@ -106,8 +108,8 @@ class Throttle {
 	/**
 	 * transform task to promise for execution more than one task at same time
 	 */
-	private saftFunction(fn: () => any) {
-		return new Promise((resolve, reject) => {
+	private saftFunction(fn: () => T2) {
+		return () => new Promise<T2>((resolve, reject) => {
 			try {
 				resolve(fn());
 			} catch (err) {
@@ -119,7 +121,7 @@ class Throttle {
 	 * throttle all tasks is done event
 	 * returns throttle result info
 	 */
-	done(res: ThrottleResult) {}
+	done(res: ThrottleResult) { }
 
 	private nextDelay() {
 		const now = Date.now();
@@ -139,8 +141,8 @@ class Throttle {
 	private execute() {
 		const fn = this.next();
 		if (!fn) this.allTaskDone();
-		else if (fn instanceof Promise) this.runPromise(fn);
-		else this.runPromise(this.saftFunction(fn));
+		else if (fn?.toString().includes("Promise")) this.runPromise(fn as () => Promise<T2>);
+		else this.runPromise(this.saftFunction(fn as () => T2));
 	}
 	/**
 	 * run next task
@@ -163,23 +165,23 @@ class Throttle {
 	/**
 	 * events before the throttle starts
 	 */
-	onBeforeStart() {}
+	onBeforeStart() { }
 	/**
 	 * events: when the throttle changed
 	 */
-	onChange(total: number, current: number) {}
+	onChange(total: number, current: number) { }
 
 	/**
 	 * events: when the throttle error
 	 */
-	onError(error: ThrottleError) {}
+	onError(error: ThrottleError) { }
 	/**
 	 * events: when the throttle cancelled
 	 */
-	onCannel(error: CancelError) {}
+	onCannel(error: CancelError) { }
 	/**
 	 * events: when the throttle task error
 	 */
-	onTaskError(error: ThrottleError) {}
+	onTaskError(error: ThrottleError) { }
 }
 export default Throttle;
